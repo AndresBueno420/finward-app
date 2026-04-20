@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -9,8 +10,25 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/joho/godotenv"
+	"github.com/pressly/goose/v3"
 )
+
+func runMigrations(dbUrl string) {
+	// Goose usa la librería estándar database/sql
+	db, err := sql.Open("pgx", dbUrl)
+	if err != nil {
+		log.Fatalf("Error abriendo conexión para migraciones: %v", err)
+	}
+	defer db.Close()
+
+	// Le decimos a Goose dónde están nuestros archivos SQL
+	if err := goose.Up(db, "migrations"); err != nil {
+		log.Fatalf("Error ejecutando migraciones Goose: %v", err)
+	}
+	log.Println("Migraciones validadas/ejecutadas correctamente por Goose.")
+}
 
 func main() {
 	// 1. Cargar variables de entorno
@@ -23,6 +41,8 @@ func main() {
 	if dbUrl == "" {
 		log.Fatal("DB_URL no está definida en las variables de entorno")
 	}
+
+	runMigrations(dbUrl)
 
 	// Creamos un Pool de conexiones para manejar múltiples peticiones concurrentes
 	dbPool, err := pgxpool.New(context.Background(), dbUrl)
