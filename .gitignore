@@ -4,3 +4,4 @@ node_modules/
 *.out
 /backend-go/vendor/
 backend-go/.env
+CLAUDE.md

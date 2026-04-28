@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"tu-modulo/internal/domain" // IMPORTANTE: Cambia "tu-modulo" por el nombre de tu proyecto en el archivo go.mod
+	"finward-backend/internal/domain" // IMPORTANTE: Cambia "tu-modulo" por el nombre de tu proyecto en el archivo go.mod
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )

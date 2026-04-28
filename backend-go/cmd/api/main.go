@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"database/sql"
+	"finward-backend/internal/handlers"
+	"finward-backend/internal/repository"
 	"fmt"
 	"log"
 	"net/http"
@@ -22,8 +24,6 @@ func runMigrations(dbUrl string) {
 		log.Fatalf("Error abriendo conexión para migraciones: %v", err)
 	}
 	defer db.Close()
-
-	// Le decimos a Goose dónde están nuestros archivos SQL
 	if err := goose.Up(db, "migrations"); err != nil {
 		log.Fatalf("Error ejecutando migraciones Goose: %v", err)
 	}
@@ -57,8 +57,22 @@ func main() {
 	}
 	fmt.Println("Conexión exitosa a PostgreSQL")
 
+	userRepo := repository.NewUserRepository(dbPool)
+	authHandler := handlers.NewAuthHandler(userRepo)
+
 	// 3. Configurar el servidor HTTP con Gin
 	r := gin.Default()
+
+	r.Use(func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "http://localhost:5173")
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+		c.Next()
+	})
 
 	// Endpoint de prueba (Healthcheck)
 	r.GET("/ping", func(c *gin.Context) {
@@ -67,6 +81,8 @@ func main() {
 			"status":  "API de FinWard funcionando correctamente",
 		})
 	})
+
+	r.POST("/login", authHandler.Login)
 
 	// 4. Arrancar el servidor
 	port := os.Getenv("PORT")
