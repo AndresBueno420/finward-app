@@ -2,8 +2,6 @@ node_modules/
 .env
 *.exe
 *.out
-/backend-go/vendor/
-backend-go/.env
+/api/vendor/
+api/.env
 CLAUDE.md
-
-HU-04-notification-listener.md
