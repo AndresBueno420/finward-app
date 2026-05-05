@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
-const API_URL = 'http://10.0.2.2:8080'; // Android emulator → localhost
+const API_URL = 'http://192.168.86.22:8080'; // Android emulator → localhost
 // const API_URL = 'http://localhost:8080'; // iOS simulator
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;

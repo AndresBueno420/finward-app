@@ -22,7 +22,8 @@ class NotificationListenerModule : Module() {
     }
 
     Function("isNotificationServiceEnabled") {
-      val context = appContext.reactContext ?: return@Function false
+      val context = appContext.reactContext
+        ?: return@Function false
       val component = ComponentName(context, FinwardNotificationListenerService::class.java)
       val enabled = Settings.Secure.getString(
         context.contentResolver,
@@ -32,8 +33,9 @@ class NotificationListenerModule : Module() {
     }
 
     Function("openNotificationSettings") {
-      val activity = appContext.currentActivity ?: return@Function
-      activity.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+      appContext.currentActivity?.startActivity(
+        Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+      )
     }
   }
 

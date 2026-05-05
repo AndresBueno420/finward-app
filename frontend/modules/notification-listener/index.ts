@@ -16,16 +16,16 @@ declare class NotificationListenerNativeModule extends NativeModule<Events> {
   openNotificationSettings(): void;
 }
 
-const NativeModule =
+const listenerModule =
   requireNativeModule<NotificationListenerNativeModule>('NotificationListener');
-const emitter = new EventEmitter(NativeModule);
+const emitter = new EventEmitter(listenerModule);
 
 export function isNotificationServiceEnabled(): boolean {
-  return NativeModule.isNotificationServiceEnabled();
+  return listenerModule.isNotificationServiceEnabled();
 }
 
 export function openNotificationSettings(): void {
-  NativeModule.openNotificationSettings();
+  listenerModule.openNotificationSettings();
 }
 
 export function addNotificationListener(

@@ -2,12 +2,15 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"os"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/joho/godotenv"
+	"github.com/pressly/goose/v3"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -23,24 +26,22 @@ func main() {
 		log.Fatal("DB_URL no está definida en las variables de entorno")
 	}
 
+	// 3. Ejecutar migraciones con Goose (igual que el servidor API)
+	migrationsDB, err := sql.Open("pgx", dbUrl)
+	if err != nil {
+		log.Fatalf("Error abriendo conexión para migraciones: %v", err)
+	}
+	if err := goose.Up(migrationsDB, "migrations"); err != nil {
+		log.Fatalf("Error ejecutando migraciones Goose: %v", err)
+	}
+	migrationsDB.Close()
+	fmt.Println("Estructura de tablas creada/verificada correctamente.")
+
 	dbPool, err := pgxpool.New(context.Background(), dbUrl)
 	if err != nil {
 		log.Fatalf("No se pudo conectar a la base de datos: %v", err)
 	}
 	defer dbPool.Close()
-
-	// 3. Ejecutar las migraciones (Crear tablas)
-	// Lee el archivo SQL. Ajusta la ruta si el nombre de tu archivo es distinto.
-	sqlBytes, err := os.ReadFile("migrations/01_init_schema.up.sql")
-	if err != nil {
-		log.Fatalf("Error leyendo el archivo SQL: %v. ¿Estás ejecutando el comando desde la raíz del proyecto?", err)
-	}
-
-	_, err = dbPool.Exec(context.Background(), string(sqlBytes))
-	if err != nil {
-		log.Fatalf("Error creando la estructura en la base de datos: %v", err)
-	}
-	fmt.Println("Estructura de tablas creada/verificada correctamente.")
 
 	// 4. Datos del usuario quemado (Seeding)
 	email := "test@finward.com"
